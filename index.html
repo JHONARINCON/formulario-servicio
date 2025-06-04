@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Orden de Servicio Técnico</title>
+
+  <style>
+    /* Estilos modernos y ordenados */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f7f9fc;
+      margin: 0; padding: 0;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .container {
+      max-width: 900px;
+      background: white;
+      padding: 20px 30px;
+      border-radius: 12px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+      box-sizing: border-box;
+    }
+    .header-logo {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .header-logo img {
+      max-height: 80px;
+      object-fit: contain;
+    }
+    h1 {
+      font-weight: 700;
+      text-align: center;
+      color: #005a87;
+      margin-bottom: 25px;
+    }
+    form label {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 12px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #222;
+    }
+    form input[type=text],
+    form input[type=date],
+    form input[type=time],
+    form textarea {
+      margin-top: 5px;
+      border: 1px solid #aaa;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: border-color 0.3s ease;
+      resize: vertical;
+      min-height: 28px;
+    }
+    form textarea {
+      min-height: 60px;
+    }
+    form input[type=text]:focus,
+    form input[type=date]:focus,
+    form input[type=time]:focus,
+    form textarea:focus {
+      border-color: #0077be;
+      outline: none;
+      box-shadow: 0 0 8px rgb(0 119 190 / 0.4);
+    }
+    /* Radio & checkbox */
+    form label > input[type=radio],
+    form label > input[type=checkbox] {
+      margin-right: 8px;
+      margin-top: 3px;
+      align-self: flex-start;
+    }
+    button[type=submit], button.export-pdf {
+      background-color: #0077be;
+      color: white;
+      font-weight: 700;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 10px;
+      transition: background-color 0.3s ease;
+    }
+    button[type=submit]:hover, button.export-pdf:hover {
+      background-color: #005a87;
+    }
+    #mensaje {
+      margin-top: 12px;
+      font-weight: 600;
+      text-align: center;
+      color: #007a00;
+    }
+    /* Firmas canvas */
+    canvas {
+      border: 1px solid #bbb;
+      border-radius: 6px;
+      background: #fff;
+      cursor: crosshair;
+      margin-top: 5px;
+      margin-bottom: 10px;
+    }
+    /* Lista formularios */
+    #registeredFormsContainer {
+      margin-top: 40px;
+    }
+    #registeredForms {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 0.9rem;
+      color: #222;
+    }
+    #registeredForms th,
+    #registeredForms td {
+      border: 1px solid #bbb;
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    #registeredForms th {
+      background-color: #0077be;
+      color: white;
+      font-weight: 700;
+    }
+    /* Responsive */
+    @media (max-width: 640px) {
+      .container {
+        padding: 15px 15px;
+      }
+      form label {
+        font-size: 0.9rem;
+      }
+      button[type=submit], button.export-pdf {
+        width: 100%;
+      }
+    }
+  </style>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-firestore.js"></script>
+
+  <!-- jsPDF librería CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <!-- Importar como módulo para firebase config e inicializar -->
+  <script type="module">
+    import { firebaseConfig } from './firebase-config.js';
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-firestore.js";
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Inicializar firma en canvas
+    function initSignaturePad(canvasId) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+      let drawing = false;
+
+      function getPos(e) {
+        if (e.touches) {
+          return {
+            x: e.touches[0].clientX - canvas.getBoundingClientRect().left,
+            y: e.touches[0].clientY - canvas.getBoundingClientRect().top
+          };
+        } else {
+          return { x: e.offsetX, y: e.offsetY };
+        }
+      }
+      canvas.addEventListener('mousedown', (e) => {
+        drawing = true;
+        const pos = getPos(e);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+      });
+      canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        drawing = true;
+        const pos = getPos(e);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+      });
+      canvas.addEventListener('mousemove', (e) => {
+        if (!drawing) return;
+        const pos = getPos(e);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+      });
+      canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        if (!drawing) return;
+        const pos = getPos(e);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+      });
+      canvas.addEventListener('mouseup', () => { drawing = false; });
+      canvas.addEventListener('touchend', () => { drawing = false; });
+      canvas.addEventListener('mouseout', () => { drawing = false; });
+    }
+    function clearCanvas(canvasId) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    initSignaturePad('firmaCliente');
+    initSignaturePad('firmaTecnico');
+
+    const form = document.getElementById('serviceForm');
+    const mensajeDiv = document.getElementById('mensaje');
+    const formsTableBody = document.getElementById('formsTableBody');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      formData.set('firmaCliente', getCanvasDataURL('firmaCliente'));
+      formData.set('firmaTecnico', getCanvasDataURL('firmaTecnico'));
+
+      const dataToSave = {};
+      for (const [key, value] of formData.entries()) {
+        dataToSave[key] = value;
+      }
+
+      try {
+        await addDoc(collection(db, "formularios"), dataToSave);
+        mensajeDiv.textContent = 'Formulario enviado correctamente.';
+        mensajeDiv.style.color = 'green';
+
+        form.reset();
+        clearCanvas('firmaCliente');
+        clearCanvas('firmaTecnico');
+
+        loadForms();
+      } catch (error) {
+        mensajeDiv.textContent = 'Error al enviar el formulario: ' + error.message;
+        mensajeDiv.style.color = 'red';
+      }
+    });
+
+    function getCanvasDataURL(canvasId) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+
+      const blank = document.createElement('canvas');
+      blank.width = canvas.width;
+      blank.height = canvas.height;
+      if (canvas.toDataURL() === blank.toDataURL()) {
+        return '';
+      }
+      return canvas.toDataURL('image/png');
+    }
+
+    async function loadForms() {
+      formsTableBody.innerHTML = '';
+      try {
+        const q = query(collection(db, "formularios"), orderBy("fechaSolicitud", "desc"));
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+          formsTableBody.innerHTML = '<tr><td colspan="21" style="text-align:center;">No hay formularios registrados</td></tr>';
+          return;
+        }
+        querySnapshot.forEach(doc => {
+          const f = doc.data();
+
+          function safeText(str) {
+            return String(str || '').replace(/</g, "&lt;").replace(/>/g, "&gt;");
+          }
+
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${safeText(f.fechaSolicitud)}</td>
+            <td>${safeText(f.cliente)}</td>
+            <td>${safeText(f.cedula)}</td>
+            <td>${safeText(f.direccion)}</td>
+            <td>${safeText(f.telefono)}</td>
+            <td>${safeText(f.horaSolicitud)}</td>
+            <td>${safeText(f.contacto)}</td>
+            <td>${safeText(f.serie)}</td>
+            <td>${safeText(f.contador)}</td>
+            <td>${safeText(f.dependencia)}</td>
+            <td>${safeText(f.fechaInicio)}</td>
+            <td>${safeText(f.horaInicio)}</td>
+            <td>${safeText(f.fechaFin)}</td>
+            <td>${safeText(f.horaFin)}</td>
+            <td>${safeText(f.observacion)}</td>
+            <td>${safeText(f.calificacion)}</td>
+            <td>${safeText(f.descripcion)}</td>
+            <td>${(f.mantenimiento ? 'Mantenimiento ' : '') + (f.alquiler ? 'Alquiler' : '')}</td>
+            <td>${safeText(f.modelo)}</td>
+            <td>${safeText(f.nombreCliente)}</td>
+            <td>${safeText(f.nombreTecnico)}</td>
+          `;
+          formsTableBody.appendChild(row);
+        });
+      } catch (error) {
+        console.error('Error al cargar formularios:', error);
+        formsTableBody.innerHTML = '<tr><td colspan="21" style="color:red; text-align:center;">Error al cargar formularios</td></tr>';
+      }
+    }
+
+    document.getElementById('exportPDFBtn').addEventListener('click', async () => {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'pt',
+        format: 'letter',
+      });
+
+      const margin = 40;
+      let cursorY = 50;
+      const lineHeight = 16;
+      const cellPadding = 4;
+
+      doc.setFontSize(14);
+      doc.setTextColor('#005a87');
+      doc.text('Formularios de Orden de Servicio Técnico', margin, cursorY);
+      cursorY += lineHeight * 2;
+
+      doc.setFontSize(10);
+      doc.setTextColor('#000');
+
+      const columnHeaders = [
+        'Fecha Solicitud', 'Cliente', 'NIT/Cédula', 'Dirección',
+        'Teléfono', 'Hora Solicitud', 'Contacto', 'Calificación', 'Descripción', 'Tipo Contrato'
+      ];
+
+      const colWidths = [
+        70, 80, 60, 100,
+        60, 60, 70, 60, 120, 80
+      ];
+
+      let cursorX = margin;
+      doc.setFillColor(0, 87, 135);
+      doc.setTextColor(255, 255, 255);
+      for (let i = 0; i < columnHeaders.length; i++) {
+        const w = colWidths[i];
+        doc.rect(cursorX, cursorY - lineHeight + 4, w, lineHeight, 'F');
+        doc.text(columnHeaders[i], cursorX + cellPadding, cursorY);
+        cursorX += w;
+      }
+      cursorY += lineHeight + 4;
+      doc.setTextColor(0, 0, 0);
+
+      const rows = Array.from(document.querySelectorAll('#registeredForms tbody tr'));
+      for (const row of rows) {
+        if (cursorY > doc.internal.pageSize.getHeight() - margin - 40) {
+          doc.addPage();
+          cursorY = margin;
+        }
+        const cells = row.querySelectorAll('td');
+        cursorX = margin;
+
+        const values = [
+          cells[0]?.textContent || '',
+          cells[1]?.textContent || '',
+          cells[2]?.textContent || '',
+          cells[3]?.textContent || '',
+          cells[4]?.textContent || '',
+          cells[5]?.textContent || '',
+          cells[6]?.textContent || '',
+          cells[15]?.textContent || '',
+          cells[16]?.textContent || '',
+          cells[17]?.textContent || ''
+        ];
+
+        for (let i = 0; i < values.length; i++) {
+          const w = colWidths[i];
+          const text = String(values[i]);
+          let lines = doc.splitTextToSize(text, w - cellPadding * 2);
+          doc.text(lines, cursorX + cellPadding, cursorY);
+          cursorX += w;
+        }
+        cursorY += lineHeight * Math.max(1, Math.ceil(lines.length));
+      }
+
+      doc.save('formularios_orden_servicio.pdf');
+    });
+
+    window.onload = loadForms;
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div class="header-logo">
+      <img src="logo.png" alt="Logo Empresa" />
+    </div>
+
+    <h1>Formulario Orden de Servicio</h1>
+
+    <form id="serviceForm">
+      <label>Fecha Solicitud:<input type="date" name="fechaSolicitud" required></label>
+      <label>Cliente:<input type="text" name="cliente" required></label>
+      <label>NIT o Cédula:<input type="text" name="cedula" required></label>
+      <label>Dirección:<input type="text" name="direccion" required></label>
+      <label>Teléfono:<input type="text" name="telefono" required></label>
+      <label>Hora Solicitud:<input type="time" name="horaSolicitud" required></label>
+      <label>Contacto Cliente:<input type="text" name="contacto" required></label>
+      <label>Serie:<input type="text" name="serie"></label>
+      <label>Contador:<input type="text" name="contador"></label>
+      <label>Dependencia/Oficina:<input type="text" name="dependencia"></label>
+
+      <label>Fecha Inicio:<input type="date" name="fechaInicio"></label>
+      <label>Hora Inicio:<input type="time" name="horaInicio"></label>
+      <label>Fecha Fin:<input type="date" name="fechaFin"></label>
+      <label>Hora Fin:<input type="time" name="horaFin"></label>
+
+      <label>Observación Técnica:<textarea name="observacion"></textarea></label>
+
+      <fieldset style="margin-bottom:12px;">
+        <legend style="font-weight:600; margin-bottom:6px;">Calificación del Servicio:</legend>
+        <label><input type="radio" name="calificacion" value="Excelente" required> Excelente</label>
+        <label><input type="radio" name="calificacion" value="Bueno"> Bueno</label>
+        <label><input type="radio" name="calificacion" value="Malo"> Malo</label>
+      </fieldset>
+
+      <label>Descripción del Servicio:<textarea name="descripcion"></textarea></label>
+
+      <fieldset style="margin-bottom:12px;">
+        <legend style="font-weight:600; margin-bottom:6px;">Tipo de Contrato:</legend>
+        <label><input type="checkbox" name="mantenimiento"> Mantenimiento</label>
+        <label><input type="checkbox" name="alquiler"> Alquiler</label>
+      </fieldset>
+
+      <label>Modelo del Equipo:<input type="text" name="modelo"></label>
+
+      <label>Nombre Cliente:<input type="text" name="nombreCliente" required></label>
+      <label>Nombre Técnico:<input type="text" name="nombreTecnico" required></label>
+
+      <label>Firma Cliente:</label>
+      <canvas id="firmaCliente" width="300" height="100"></canvas>
+      <button type="button" onclick="clearCanvas('firmaCliente')">Limpiar Firma Cliente</button>
+
+      <label>Firma Técnico:</label>
+      <button type="button" onclick="clearCanvas('firmaTecnico')">Limpiar Firma Técnico</button>
+
+      <button type="submit">Enviar</button>
+    </form>
+
+    <div id="mensaje"></div>
+
+    <button class="export-pdf" id="exportPDFBtn">Exportar a PDF</button>
+
+    <div id="registeredFormsContainer">
+      <h2>Formularios Registrados</h2>
+      <table id="registeredForms">
+        <thead>
+          <tr>
+            <th>Fecha Solicitud</th>
+            <th>Cliente</th>
+            <th>NIT/Cédula</th>
+            <th>Dirección</th>
+            <th>Teléfono</th>
+            <th>Hora Solicitud</th>
+            <th>Contacto</th>
+            <th>Serie</th>
+            <th>Contador</th>
+            <th>Dependencia</th>
+            <th>Fecha Inicio</th>
+            <th>Hora Inicio</th>
+            <th>Fecha Fin</th>
+            <th>Hora Fin</th>
+            <th>Observación</th>
+            <th>Calificación</th>
+            <th>Descripción</th>
+            <th>Tipo Contrato</th>
+            <th>Modelo</th>
+            <th>Nombre Cliente</th>
+            <th>Nombre Técnico</th>
+          </tr>
+        </thead>
+        <tbody id="formsTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+  <script type="module" src="main.js"></script>
+</body>
+</html>
+

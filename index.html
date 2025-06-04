@@ -158,18 +158,24 @@
 
   <!-- Importar como módulo para firebase config e inicializar -->
   <script>
-  // ✅ TU CONFIGURACIÓN AQUÍ DIRECTAMENTE
-  const firebaseConfig = {
-    apiKey: "TU_API_KEY",
-    authDomain: "tu-proyecto.firebaseapp.com",
-    projectId: "tu-proyecto",
-    storageBucket: "tu-proyecto.appspot.com",
-    messagingSenderId: "XXX",
-    appId: "XXX"
-  };
+  // firebaseConfig.js
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-lite.js";
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
+const firebaseConfig = {
+  apiKey: "AIzaSyBaJ7lhGoCTq9a4cmL5P31b9RbF31QaNnE",
+  authDomain: "ordenes-servicio-a8209.firebaseapp.com",
+  projectId: "ordenes-servicio-a8209",
+  storageBucket: "ordenes-servicio-a8209.appspot.com",
+  messagingSenderId: "480144746551",
+  appId: "1:480144746551:web:28787185ca77baa50737b2"
+};
+
+// Inicializar Firebase
+const app = initializeApp(firebaseConfig);
+
+// Inicializar Firestore Lite y exportar
+export const db = getFirestore(app);
 </script>
   <script type="module">
     

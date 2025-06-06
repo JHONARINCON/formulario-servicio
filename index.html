@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Orden de Servicio Técnico Mejorado</title>
+
+  <!-- Font Awesome para íconos -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    integrity="sha512-p+1ic7YYmHo+K3pEo8PCtVzWsGiLQzCoB6MzfiEYJ7iGJTxBGurHknr+7OFEZFbM+E6ZWda+1h8YVQFfB1k5mw=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+
+  <style>
+    /* Reset y tipografía */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap');
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f9fafb;
+      color: #374151;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      padding: 1rem;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      max-width: 900px;
+      width: 100%;
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 12px rgb(0 0 0 / 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+    header.header-logo {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+    header.header-logo img {
+      max-width: 200px;
+      height: auto;
+      user-select: none;
+    }
+    h1 {
+      font-weight: 700;
+      font-size: 2rem;
+      color: #111827;
+      text-align: center;
+      margin-bottom: 0.75rem;
+    }
+    h2 {
+      font-weight: 600;
+      font-size: 1.5rem;
+      color: #111827;
+      margin-bottom: 0.5rem;
+    }
+    label {
+      display: flex;
+      flex-direction: column;
+      font-weight: 600;
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+      color: #374151;
+    }
+    input[type="text"],
+    input[type="date"],
+    input[type="time"],
+    textarea,
+    input[type="search"] {
+      margin-top: 0.25rem;
+      font-weight: 400;
+      font-size: 1rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.5rem;
+      border: 1px solid #d1d5db;
+      transition: border-color 0.3s ease;
+      resize: vertical;
+      font-family: inherit;
+    }
+    input[type="text"]:focus,
+    input[type="date"]:focus,
+    input[type="time"]:focus,
+    input[type="search"]:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgb(59 130 246 / 0.3);
+    }
+    textarea {
+      min-height: 80px;
+    }
+    .radio-group,
+    .checkbox-group {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .radio-group label,
+    .checkbox-group label {
+      font-weight: 500;
+      font-size: 1rem;
+      color: #374151;
+      flex-shrink: 0;
+      align-items: center;
+      display: flex;
+      gap: 0.25rem;
+    }
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      user-select: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    button:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgb(59 130 246 / 0.4);
+    }
+    button[type="submit"],
+    .registro-boton,
+    #exportAll {
+      background: #2563eb;
+      color: #ffffff;
+    }
+    button[type="submit"]:hover,
+    .registro-boton:hover,
+    #exportAll:hover {
+      background: #1e40af;
+    }
+    .clear-signature {
+      background: #ef4444;
+      color: #ffffff;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      border-radius: 0.375rem;
+      transition: background 0.3s;
+    }
+    .clear-signature:hover {
+      background: #b91c1c;
+    }
+    #mensaje {
+      font-weight: 600;
+      text-align: center;
+      min-height: 1.25rem;
+    }
+    /* Canvas firma */
+    .signature-area {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      margin-bottom: 1.5rem;
+      max-width: 320px;
+    }
+    canvas {
+      border-radius: 0.5rem;
+      border: 1px solid #9ca3af;
+      touch-action: none;
+      background: #ffffff;
+      width: 100%;
+      max-width: 320px;
+      height: 100px;
+      user-select: none;
+    }
+    /* Formularios registrados */
+    #buscador {
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 1rem;
+    }
+    #exportAll {
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+    #registros {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-height: 360px;
+      overflow-y: auto;
+      border-radius: 0.5rem;
+      border: 1px solid #e5e7eb;
+      padding: 1rem;
+      background: #fff;
+      box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+    }
+    .registro-card {
+      background: #f3f4f6;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 5px rgb(0 0 0 / 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.95rem;
+      color: #374151;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .registro-info {
+      flex-grow: 1;
+      margin-right: 1rem;
+      word-break: break-word;
+    }
+    .registro-boton,
+    .edit-boton {
+      background: #2563eb;
+      color: #ffffff;
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.375rem;
+      font-size: 0.9rem;
+      transition: background-color 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .registro-boton:hover,
+    .edit-boton:hover {
+      background: #1e40af;
+    }
+    @media (max-width: 640px) {
+      .container {
+        padding: 1.5rem 1rem;
+        max-width: 100%;
+      }
+      canvas {
+        height: 80px;
+      }
+      h1 {
+        font-size: 1.75rem;
+      }
+      label {
+        font-size: 0.85rem;
+      }
+      .registro-info {
+        font-size: 0.9rem;
+      }
+      .registro-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" role="main" aria-label="Formulario Orden de Servicio Técnico">
+    <header class="header-logo" aria-label="Logo de la empresa">
+      <img src="./logo.png" alt="Logo Empresa" />
+    </header>
+
+    <h1>Formulario Orden de Servicio</h1>
+
+    <form id="serviceForm" autocomplete="off" novalidate>
+      <label for="fechaSolicitud">Fecha Solicitud:
+        <input type="date" id="fechaSolicitud" name="fechaSolicitud" required />
+      </label>
+      <label for="cliente">Cliente:
+        <input type="text" id="cliente" name="cliente" required autocomplete="off" />
+      </label>
+      <label for="cedula">NIT o Cédula:
+        <input type="text" id="cedula" name="cedula" required autocomplete="off" />
+      </label>
+      <label for="direccion">Dirección:
+        <input type="text" id="direccion" name="direccion" required autocomplete="off" />
+      </label>
+      <label for="telefono">Teléfono:
+        <input type="text" id="telefono" name="telefono" required autocomplete="off" />
+      </label>
+      <label for="horaSolicitud">Hora Solicitud:
+        <input type="time" id="horaSolicitud" name="horaSolicitud" required />
+      </label>
+      <label for="contacto">Contacto Cliente:
+        <input type="text" id="contacto" name="contacto" required autocomplete="off" />
+      </label>
+      <label for="serie">Serie:
+        <input type="text" id="serie" name="serie" autocomplete="off" />
+      </label>
+      <label for="contador">Contador:
+        <input type="text" id="contador" name="contador" autocomplete="off" />
+      </label>
+      <label for="dependencia">Dependencia/Oficina:
+        <input type="text" id="dependencia" name="dependencia" autocomplete="off" />
+      </label>
+
+      <label for="fechaInicio">Fecha Inicio:
+        <input type="date" id="fechaInicio" name="fechaInicio" />
+      </label>
+      <label for="horaInicio">Hora Inicio:
+        <input type="time" id="horaInicio" name="horaInicio" />
+      </label>
+      <label for="fechaFin">Fecha Fin:
+        <input type="date" id="fechaFin" name="fechaFin" />
+      </label>
+      <label for="horaFin">Hora Fin:
+        <input type="time" id="horaFin" name="horaFin" />
+      </label>
+
+      <label for="observacion">Observación Técnica:
+        <textarea id="observacion" name="observacion"></textarea>
+      </label>
+
+      <div class="radio-group" role="radiogroup" aria-labelledby="calificacionLabel">
+        <span id="calificacionLabel" style="font-weight:600; margin-bottom: 0.25rem;">Calificación del Servicio:</span>
+        <label><input type="radio" name="calificacion" value="Excelente" required /> Excelente</label>
+        <label><input type="radio" name="calificacion" value="Bueno" /> Bueno</label>
+        <label><input type="radio" name="calificacion" value="Malo" /> Malo</label>
+      </div>
+
+      <label for="descripcion">Descripción del Servicio:
+        <textarea id="descripcion" name="descripcion"></textarea>
+      </label>
+
+      <div class="checkbox-group" aria-label="Tipo de Contrato">
+        <label><input type="checkbox" name="mantenimiento" value="Mantenimiento" /> Mantenimiento</label>
+        <label><input type="checkbox" name="alquiler" value="Alquiler" /> Alquiler</label>
+      </div>
+
+      <label for="modelo">Modelo del Equipo:
+        <input type="text" id="modelo" name="modelo" autocomplete="off" />
+      </label>
+
+      <label for="nombreCliente">Nombre Cliente:
+        <input type="text" id="nombreCliente" name="nombreCliente" required autocomplete="off" />
+      </label>
+
+      <label for="nombreTecnico">Nombre Técnico:
+        <input type="text" id="nombreTecnico" name="nombreTecnico" required autocomplete="off" />
+      </label>
+
+      <div class="signature-area" aria-label="Firma Cliente">
+        <label for="firmaCliente">Firma Cliente:</label>
+        <canvas id="firmaCliente" width="300" height="100" aria-describedby="firmaClienteDesc"></canvas>
+        <span id="firmaClienteDesc" style="font-size: 0.8rem; color:#6b7280;">Use el dedo o mouse para firmar</span>
+        <button type="button" class="clear-signature" aria-label="Limpiar firma cliente" onclick="clearCanvas('firmaCliente')">
+          <i class="fa fa-trash"></i> Limpiar Firma
+        </button>
+      </div>
+
+      <div class="signature-area" aria-label="Firma Técnico">
+        <label for="firmaTecnico">Firma Técnico:</label>
+        <canvas id="firmaTecnico" width="300" height="100" aria-describedby="firmaTecnicoDesc"></canvas>
+        <span id="firmaTecnicoDesc" style="font-size: 0.8rem; color:#6b7280;">Use el dedo o mouse para firmar</span>
+        <button type="button" class="clear-signature" aria-label="Limpiar firma técnico" onclick="clearCanvas('firmaTecnico')">
+          <i class="fa fa-trash"></i> Limpiar Firma
+        </button>
+      </div>
+
+      <button type="submit" aria-label="Enviar formulario">
+        <i class="fa fa-paper-plane"></i> Enviar
+      </button>
+    </form>
+
+    <div id="mensaje" role="alert" aria-live="polite"></div>
+
+    <h2>Buscar y Exportar Formularios</h2>
+    <input
+      type="search"
+      id="buscador"
+      placeholder="Buscar por cliente, fecha, modelo, técnico o descripción"
+      aria-label="Buscar formularios"
+    />
+    <button id="exportAll" aria-label="Exportar todos los registros filtrados a PDF">
+      <i class="fa fa-file-pdf"></i> Exportar todos a PDF
+    </button>
+    <div id="registros" aria-live="polite" aria-relevant="additions"></div>
+  </div>
+
+  <!-- Firebase y jsPDF -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      getDocs,
+      query,
+      orderBy,
+      doc,
+      getDoc,
+      updateDoc,
+    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    // Configuración Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyBaJ7lhGoCTq9a4cmL5P31b9RbF31QaNnE",
+      authDomain: "ordenes-servicio-a8209.firebaseapp.com",
+      projectId: "ordenes-servicio-a8209",
+      storageBucket: "ordenes-servicio-a8209.appspot.com",
+      messagingSenderId: "480144746551",
+      appId: "1:480144746551:web:28787185ca77baa50737b2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const formulariosCol = collection(db, 'formularios');
+
+    // Referencias DOM
+    const form = document.getElementById('serviceForm');
+    const mensaje = document.getElementById('mensaje');
+    const registrosDiv = document.getElementById('registros');
+    const buscador = document.getElementById('buscador');
+    const exportAllBtn = document.getElementById('exportAll');
+
+    let isEditing = false;
+    let editingId = null;
+
+    // Clase SignaturePad para firmas táctil y mouse
+    class SignaturePad {
+      constructor(canvas) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.ctx.strokeStyle = "#2563eb";
+        this.ctx.lineWidth = 2;
+        this.drawing = false;
+        this.resizeCanvas();
+        window.addEventListener('resize', () => this.resizeCanvas());
+        this.initEvents();
+      }
+      resizeCanvas() {
+        const ratio = window.devicePixelRatio || 1;
+        this.canvas.width = this.canvas.offsetWidth * ratio;
+        this.canvas.height = this.canvas.offsetHeight * ratio;
+        this.canvas.style.width = this.canvas.offsetWidth + 'px';
+        this.canvas.style.height = this.canvas.offsetHeight + 'px';
+        this.ctx.scale(ratio, ratio);
+        this.clear();
+      }
+      initEvents() {
+        // Mouse
+        this.canvas.addEventListener('mousedown', e => this.startDrawing(e.offsetX, e.offsetY));
+        this.canvas.addEventListener('mousemove', e => this.draw(e.offsetX, e.offsetY));
+        this.canvas.addEventListener('mouseup', () => this.stopDrawing());
+        this.canvas.addEventListener('mouseout', () => this.stopDrawing());
+        // Touch
+        this.canvas.addEventListener('touchstart', e => {
+          e.preventDefault();
+          const rect = this.canvas.getBoundingClientRect();
+          const touch = e.touches[0];
+          this.startDrawing(touch.clientX - rect.left, touch.clientY - rect.top);
+        }, { passive: false });
+        this.canvas.addEventListener('touchmove', e => {
+          e.preventDefault();
+          const rect = this.canvas.getBoundingClientRect();
+          const touch = e.touches[0];
+          this.draw(touch.clientX - rect.left, touch.clientY - rect.top);
+        }, { passive: false });
+        this.canvas.addEventListener('touchend', () => this.stopDrawing());
+      }
+      startDrawing(x, y) {
+        this.drawing = true;
+        this.ctx.beginPath();
+        this.ctx.moveTo(x, y);
+      }
+      draw(x, y) {
+        if (!this.drawing) return;
+        this.ctx.lineTo(x, y);
+        this.ctx.stroke();
+      }
+      stopDrawing() {
+        this.drawing = false;
+      }
+      clear() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      }
+      isEmpty() {
+        const blank = document.createElement('canvas');
+        blank.width = this.canvas.width;
+        blank.height = this.canvas.height;
+        return this.canvas.toDataURL() === blank.toDataURL();
+      }
+      getDataURL() {
+        return this.canvas.toDataURL();
+      }
+      setDataURL(dataURL) {
+        const img = new Image();
+        img.onload = () => {
+          this.clear();
+          this.ctx.drawImage(img, 0, 0, this.canvas.width / (window.devicePixelRatio || 1), this.canvas.height / (window.devicePixelRatio || 1));
+        };
+        img.src = dataURL;
+      }
+    }
+
+    // Instancias de SignaturePad
+    const firmaClientePad = new SignaturePad(document.getElementById('firmaCliente'));
+    const firmaTecnicoPad = new SignaturePad(document.getElementById('firmaTecnico'));
+
+    // Función para limpiar canvas
+    window.clearCanvas = function(canvasId) {
+      if (canvasId === 'firmaCliente') {
+        firmaClientePad.clear();
+      } else if (canvasId === 'firmaTecnico') {
+        firmaTecnicoPad.clear();
+      }
+    };
+
+    // Manejo de envío de formulario (crear o actualizar)
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      mensaje.textContent = '';
+      mensaje.style.color = '#059669';
+
+      // Validar firmas
+      if (firmaClientePad.isEmpty()) {
+        mensaje.style.color = '#dc2626';
+        mensaje.textContent = 'Por favor, firme el área de Firma Cliente.';
+        return;
+      }
+      if (firmaTecnicoPad.isEmpty()) {
+        mensaje.style.color = '#dc2626';
+        mensaje.textContent = 'Por favor, firme el área de Firma Técnico.';
+        return;
+      }
+
+      // Extraer datos
+      const formData = new FormData(form);
+      const data = {};
+      for (const [key, value] of formData.entries()) {
+        if (key === 'mantenimiento' || key === 'alquiler') {
+          data[key] = true;
+        } else {
+          data[key] = value.trim();
+        }
+      }
+      if (!data.mantenimiento) data.mantenimiento = false;
+      if (!data.alquiler) data.alquiler = false;
+      data.firmaCliente = firmaClientePad.getDataURL();
+      data.firmaTecnico = firmaTecnicoPad.getDataURL();
+
+      try {
+        if (isEditing && editingId) {
+          // Actualizar documento existente
+          const docRef = doc(db, 'formularios', editingId);
+          await updateDoc(docRef, data);
+          mensaje.textContent = 'Formulario actualizado con éxito.';
+          isEditing = false;
+          editingId = null;
+        } else {
+          // Crear nuevo documento
+          await addDoc(formulariosCol, data);
+          mensaje.textContent = 'Formulario enviado con éxito.';
+        }
+        form.reset();
+        firmaClientePad.clear();
+        firmaTecnicoPad.clear();
+        loadForms(currentFilter);
+      } catch (error) {
+        console.error(error);
+        mensaje.style.color = '#dc2626';
+        mensaje.textContent = 'Error al procesar el formulario. Intenta de nuevo.';
+      }
+    });
+
+    // Variables de búsqueda
+    let currentFilter = '';
+
+    // Cargar y mostrar formularios (con filtro)
+    async function loadForms(filter = '') {
+      registrosDiv.innerHTML = '';
+      currentFilter = filter.toLowerCase();
+      const snapshot = await getDocs(query(formulariosCol, orderBy('fechaSolicitud', 'desc')));
+      let count = 0;
+
+      for (const docSnap of snapshot.docs) {
+        const data = docSnap.data();
+        // Campos para buscar
+        const cliente = data.cliente?.toLowerCase() || '';
+        const fecha = data.fechaSolicitud || '';
+        const modelo = data.modelo?.toLowerCase() || '';
+        const tecnico = data.nombreTecnico?.toLowerCase() || '';
+        const descripcion = data.descripcion?.toLowerCase() || '';
+
+        const matches =
+          filter === '' ||
+          cliente.includes(currentFilter) ||
+          fecha.includes(currentFilter) ||
+          modelo.includes(currentFilter) ||
+          tecnico.includes(currentFilter) ||
+          descripcion.includes(currentFilter);
+
+        if (matches) {
+          count++;
+          const div = document.createElement('article');
+          div.className = 'registro-card';
+          div.setAttribute('tabindex', '0');
+          div.innerHTML = `
+            <div class="registro-info" title="
+              Cliente: ${data.cliente}
+              Fecha: ${data.fechaSolicitud}
+              Modelo: ${data.modelo || '-'}
+              Técnico: ${data.nombreTecnico}
+            ">
+              <strong>${data.cliente}</strong><br/>
+              <small>Fecha: ${data.fechaSolicitud}</small><br/>
+              <small>Modelo: ${data.modelo || '-'}</small><br/>
+              <small>Técnico: ${data.nombreTecnico || '-'}</small>
+            </div>
+            <div class="registro-acciones" style="display: flex; gap: 0.5rem;">
+              <button class="edit-boton" data-id="${docSnap.id}" aria-label="Editar formulario de ${data.cliente}">
+                <i class="fa fa-edit"></i> Editar
+              </button>
+              <button class="registro-boton" data-id="${docSnap.id}" aria-label="Exportar formulario de ${data.cliente} a PDF">
+                <i class="fa fa-file-pdf"></i> Exportar
+              </button>
+            </div>
+          `;
+          registrosDiv.appendChild(div);
+        }
+      }
+
+      if (count === 0) {
+        registrosDiv.textContent = 'No hay formularios que coincidan con la búsqueda.';
+      }
+    }
+
+    // Filtrar en vivo
+    buscador.addEventListener('input', (e) => {
+      const val = e.target.value.trim();
+      loadForms(val);
+    });
+
+    // Exportar un solo formulario a PDF
+    async function exportToPDF(docId, pdfInstance = null, isBulk = false) {
+      try {
+        const docRef = doc(db, 'formularios', docId);
+        const docSnap = await getDoc(docRef);
+        if (!docSnap.exists()) {
+          alert('El formulario solicitado no existe.');
+          return;
+        }
+        const data = docSnap.data();
+        const { jsPDF } = window.jspdf;
+
+        let pdf = pdfInstance;
+        let isFirstPage = false;
+
+        if (!isBulk) {
+          pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
+          isFirstPage = true;
+        }
+
+        if (!isFirstPage) {
+          pdf.addPage();
+        }
+
+        const margin = 40;
+        const lineHeight = 20;
+        let yPos = margin;
+
+        pdf.setFont('Poppins', 'bold');
+        pdf.setFontSize(18);
+        pdf.text('Orden de Servicio Técnico', 210, yPos, null, null, 'center');
+        yPos += 30;
+
+        pdf.setFontSize(12);
+        pdf.setFont('Poppins', 'normal');
+
+        const addLine = (label, value) => {
+          pdf.setFont('Poppins', 'bold');
+          pdf.text(label + ':', margin, yPos);
+          pdf.setFont('Poppins', 'normal');
+          const splitText = pdf.splitTextToSize(value || '-', 450);
+          pdf.text(splitText, margin + 130, yPos);
+          yPos += lineHeight * (splitText.length || 1);
+        };
+
+        addLine('Fecha Solicitud', data.fechaSolicitud);
+        addLine('Cliente', data.cliente);
+        addLine('NIT o Cédula', data.cedula);
+        addLine('Dirección', data.direccion);
+        addLine('Teléfono', data.telefono);
+        addLine('Hora Solicitud', data.horaSolicitud);
+        addLine('Contacto Cliente', data.contacto);
+        addLine('Serie', data.serie || '-');
+        addLine('Contador', data.contador || '-');
+        addLine('Dependencia/Oficina', data.dependencia || '-');
+        addLine('Fecha Inicio', data.fechaInicio || '-');
+        addLine('Hora Inicio', data.horaInicio || '-');
+        addLine('Fecha Fin', data.fechaFin || '-');
+        addLine('Hora Fin', data.horaFin || '-');
+        addLine('Observación Técnica', data.observacion || '-');
+        addLine('Calificación del Servicio', data.calificacion || '-');
+        addLine('Descripción del Servicio', data.descripcion || '-');
+        addLine('Tipo de Contrato',
+          (data.mantenimiento ? 'Mantenimiento ' : '') +
+          (data.alquiler ? 'Alquiler' : '') || '-'
+        );
+        addLine('Modelo del Equipo', data.modelo || '-');
+        addLine('Nombre Cliente', data.nombreCliente || '-');
+        addLine('Nombre Técnico', data.nombreTecnico || '-');
+
+        // Firma Cliente
+        yPos += 20;
+        pdf.setFont('Poppins', 'bold');
+        pdf.text('Firma Cliente:', margin, yPos);
+        yPos += 10;
+        if (data.firmaCliente) {
+          pdf.addImage(data.firmaCliente, 'PNG', margin, yPos, 150, 60);
+        } else {
+          pdf.text('No disponible', margin, yPos + 30);
+        }
+        yPos += 70;
+
+        // Firma Técnico
+        pdf.setFont('Poppins', 'bold');
+        pdf.text('Firma Técnico:', margin, yPos);
+        yPos += 10;
+        if (data.firmaTecnico) {
+          pdf.addImage(data.firmaTecnico, 'PNG', margin, yPos, 150, 60);
+        } else {
+          pdf.text('No disponible', margin, yPos + 30);
+        }
+
+        if (!isBulk) {
+          pdf.save(`Formulario_${data.cliente}_${data.fechaSolicitud}.pdf`);
+        }
+        return pdf;
+      } catch (error) {
+        console.error(error);
+        if (!isBulk) alert('Error al exportar el formulario. Inténtalo de nuevo.');
+      }
+    }
+
+    // Exportar todos los formularios filtrados a un solo PDF
+    async function exportAllToPDF() {
+      exportAllBtn.disabled = true;
+      exportAllBtn.textContent = 'Generando...';
+      const snapshot = await getDocs(query(formulariosCol, orderBy('fechaSolicitud', 'desc')));
+      let pdf = null;
+      let first = true;
+
+      for (const docSnap of snapshot.docs) {
+        const data = docSnap.data();
+        const cliente = data.cliente?.toLowerCase() || '';
+        const fecha = data.fechaSolicitud || '';
+        const modelo = data.modelo?.toLowerCase() || '';
+        const tecnico = data.nombreTecnico?.toLowerCase() || '';
+        const descripcion = data.descripcion?.toLowerCase() || '';
+
+        const matches =
+          currentFilter === '' ||
+          cliente.includes(currentFilter) ||
+          fecha.includes(currentFilter) ||
+          modelo.includes(currentFilter) ||
+          tecnico.includes(currentFilter) ||
+          descripcion.includes(currentFilter);
+
+        if (matches) {
+          if (first) {
+            pdf = await exportToPDF(docSnap.id, null, false);
+            first = false;
+          } else {
+            await exportToPDF(docSnap.id, pdf, true);
+          }
+        }
+      }
+
+      if (pdf) {
+        pdf.save(`Todos_Formularios_${new Date().toISOString().slice(0,10)}.pdf`);
+      } else {
+        alert('No hay formularios filtrados para exportar.');
+      }
+
+      exportAllBtn.disabled = false;
+      exportAllBtn.innerHTML = '<i class="fa fa-file-pdf"></i> Exportar todos a PDF';
+    }
+
+    exportAllBtn.addEventListener('click', exportAllToPDF);
+
+    // Manejo de clics en la lista (Editar / Exportar individual)
+    registrosDiv.addEventListener('click', async (e) => {
+      const id = e.target.closest('button')?.getAttribute('data-id');
+      if (!id) return;
+
+      if (e.target.closest('.registro-boton')) {
+        // Exportar único
+        exportToPDF(id);
+      } else if (e.target.closest('.edit-boton')) {
+        // Editar registro
+        try {
+          const docRef = doc(db, 'formularios', id);
+          const docSnap = await getDoc(docRef);
+          if (!docSnap.exists()) {
+            alert('El formulario no existe.');
+            return;
+          }
+          const data = docSnap.data();
+          // Cargar datos en el formulario
+          form.fechaSolicitud.value = data.fechaSolicitud;
+          form.cliente.value = data.cliente;
+          form.cedula.value = data.cedula;
+          form.direccion.value = data.direccion;
+          form.telefono.value = data.telefono;
+          form.horaSolicitud.value = data.horaSolicitud;
+          form.contacto.value = data.contacto;
+          form.serie.value = data.serie || '';
+          form.contador.value = data.contador || '';
+          form.dependencia.value = data.dependencia || '';
+          form.fechaInicio.value = data.fechaInicio || '';
+          form.horaInicio.value = data.horaInicio || '';
+          form.fechaFin.value = data.fechaFin || '';
+          form.horaFin.value = data.horaFin || '';
+          form.observacion.value = data.observacion || '';
+          if (data.calificacion) {
+            const radios = document.getElementsByName('calificacion');
+            radios.forEach(radio => {
+              if (radio.value === data.calificacion) radio.checked = true;
+              else radio.checked = false;
+            });
+          }
+          form.descripcion.value = data.descripcion || '';
+          form.mantenimiento.checked = data.mantenimiento || false;
+          form.alquiler.checked = data.alquiler || false;
+          form.modelo.value = data.modelo || '';
+          form.nombreCliente.value = data.nombreCliente || '';
+          form.nombreTecnico.value = data.nombreTecnico || '';
+          // Cargar firmas
+          if (data.firmaCliente) {
+            firmaClientePad.setDataURL(data.firmaCliente);
+          } else {
+            firmaClientePad.clear();
+          }
+          if (data.firmaTecnico) {
+            firmaTecnicoPad.setDataURL(data.firmaTecnico);
+          } else {
+            firmaTecnicoPad.clear();
+          }
+          // Ajustar flags de edición
+          isEditing = true;
+          editingId = id;
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch (error) {
+          console.error(error);
+          alert('Error al cargar el formulario para edición.');
+        }
+      }
+    });
+
+    // Cargar registros iniciales
+    loadForms('');
+  </script>
+</body>
+</html>

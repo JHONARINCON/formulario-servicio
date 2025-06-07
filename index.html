@@ -588,19 +588,8 @@
       for (const docSnap of snapshot.docs) {
         const data = docSnap.data();
         // Campos para buscar
-        const cliente = data.cliente?.toLowerCase() || '';
-        const fecha = data.fechaSolicitud || '';
-        const modelo = data.modelo?.toLowerCase() || '';
-        const tecnico = data.nombreTecnico?.toLowerCase() || '';
-        const descripcion = data.descripcion?.toLowerCase() || '';
-
-        const matches =
-          filter === '' ||
-          cliente.includes(currentFilter) ||
-          fecha.includes(currentFilter) ||
-          modelo.includes(currentFilter) ||
-          tecnico.includes(currentFilter) ||
-          descripcion.includes(currentFilter);
+        const values = Object.values(data).map(v => v !== undefined && v !== null ? v.toString().toLowerCase() : '');
+        const matches = filter === '' || values.some(val => val.includes(currentFilter));
 
         if (matches) {
           count++;
